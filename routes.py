@@ -1,10 +1,11 @@
 import json
 import uuid
 from flask import request, jsonify
-from store import app, db
-from .utils import json_response, JSON_MIME_TYPE
-from .validation import validate_date_and_citizens_id, validate_schema, validate_relatives
+from app import app, db
+from utils import json_response, JSON_MIME_TYPE
+from validation import validate_date_and_citizens_id, validate_schema, validate_relatives
 from jsonschema import ValidationError, SchemaError
+from models import Citizen
 
 
 @app.route("/imports", methods=["POST"])
@@ -33,9 +34,20 @@ def imports():
         error = json.dumps({'error': 'Relatives array contains nonexistent citizen_id'})
         return json_response(error, 400)
 
+    import_uuid = uuid.uuid4()
+
+    # create object in database
+    for citizen in data["citizens"]:
+        new_citizen = Citizen(citizen_id=citizen["citizen_id"], town=citizen["town"], street=citizen["street"],
+                              building=citizen["building"], apartment=citizen["apartment"], name=citizen["name"],
+                              birth_date=citizen["birth_date"], gender=citizen["gender"], relatives=citizen["relatives"],
+                              import_id=import_uuid)
+        db.session.add(new_citizen)
+        db.session.commit()
+
     import_id = {
         "data": {
-            "import-id": f'{uuid.uuid4()}'
+            "import-id": f'{import_uuid}'
         }
     }
 
