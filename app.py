@@ -7,4 +7,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://shamilv05:1915367v@localho
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from store import routes
+from models import Citizen
+import routes
+
+
