@@ -1,4 +1,3 @@
-from jsonschema import validate, ValidationError, SchemaError
 from datetime import datetime
 from numpy import unique
 
@@ -49,19 +48,61 @@ citizens_schema = {
                         }
                     }
                 },
-                'required': ['citizen_id', 'town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']
+                'required': ['citizen_id', 'town', 'street', 'building', 'apartment',
+                             'name', 'birth_date', 'gender', 'relatives'],
+                'additionalProperties': False
             }
         }
     },
-    'required': ['citizens']
+    'required': ['citizens'],
+    'additionalProperties': False
 }
 
 
-def validate_schema(input_json):
-    validate(input_json, citizens_schema)
+# Schema for PATCH request
+patch_req_schema = {
+    'type': 'object',
+    'properties': {
+        'town': {
+            'type': 'string',
+            'minLength': 1
+        },
+        'street': {
+            'type': 'string',
+            'minLength': 1
+        },
+        'building': {
+            'type': 'string',
+            'minLength': 1
+        },
+        'apartment': {
+            'type': 'integer',
+            'minimum': 0
+        },
+        'name': {
+            'type': 'string',
+            'minLength': 1
+        },
+        'birth_date': {
+            'type': 'string',
+            'minLength': 1
+        },
+        'gender': {
+            'type': 'string',
+            'enum': ['male', 'female']
+        },
+        'relatives': {
+            'type': 'array',
+            'items': {
+                'type': 'integer'
+            }
+        },
+    },
+    'additionalProperties': False
+}
 
 
-def validate_relatives(input_json, citizens_id):
+def validate_relatives(input_json, citizens_id): # улучшить
     relatives_dict = {}
     for citizen in input_json["citizens"]:
         relatives_dict[citizen["citizen_id"]] = citizen["relatives"]
