@@ -1,4 +1,4 @@
-from app import db
+from app import db, ma
 from sqlalchemy.ext.mutable import Mutable
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -33,6 +33,11 @@ class Citizen(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     relatives = db.Column(MutableList.as_mutable(ARRAY(db.Integer)))
     import_id = db.Column(db.String(100), nullable=False)
+
+
+class CitizenSchema(ma.ModelSchema):
+    class Meta:
+        model = Citizen
 
 
 
