@@ -16,15 +16,15 @@ citizens_schema = {
                     },
                     'town': {
                         'type': 'string',
-                        'minLength': 1
+                        'pattern': '^[^\s]+(\s+[^\s]+)*$',
                     },
                     'street': {
                         'type': 'string',
-                        'minLength': 1
+                        'pattern': '^[^\s]+(\s+[^\s]+)*$',
                     },
                     'building': {
                         'type': 'string',
-                        'minLength': 1
+                        'pattern': '^[^\s]+(\s+[^\s]+)*$',
                     },
                     'apartment': {
                         'type': 'integer',
@@ -32,10 +32,11 @@ citizens_schema = {
                     },
                     'name': {
                         'type': 'string',
-                        'minLength': 1
+                        'pattern': '^[^\s]+(\s+[^\s]+)*$',
                     },
                     'birth_date': {
-                        'type': 'string'
+                        'type': 'string',
+                        'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$'
                     },
                     'gender': {
                         'type': 'string',
@@ -45,7 +46,8 @@ citizens_schema = {
                         'type': 'array',
                         'items': {
                             'type': 'integer'
-                        }
+                        },
+                        "uniqueItems": True
                     }
                 },
                 'required': ['citizen_id', 'town', 'street', 'building', 'apartment',
@@ -65,15 +67,15 @@ patch_req_schema = {
     'properties': {
         'town': {
             'type': 'string',
-            'minLength': 1
+            'pattern': '^[^\s]+(\s+[^\s]+)*$'
         },
         'street': {
             'type': 'string',
-            'minLength': 1
+            'pattern': '^[^\s]+(\s+[^\s]+)*$'
         },
         'building': {
             'type': 'string',
-            'minLength': 1
+            'pattern': '^[^\s]+(\s+[^\s]+)*$'
         },
         'apartment': {
             'type': 'integer',
@@ -81,11 +83,11 @@ patch_req_schema = {
         },
         'name': {
             'type': 'string',
-            'minLength': 1
+            'pattern': '^[^\s]+(\s+[^\s]+)*$'
         },
         'birth_date': {
             'type': 'string',
-            'minLength': 1
+            'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$'
         },
         'gender': {
             'type': 'string',
@@ -95,33 +97,32 @@ patch_req_schema = {
             'type': 'array',
             'items': {
                 'type': 'integer'
-            }
+            },
+            "uniqueItems": True
         },
     },
-    'additionalProperties': False
+    'additionalProperties': False,
+    'minProperties': 1
 }
 
 
-def validate_relatives(input_json, citizens_id): # улучшить
+def json_validation(input_json):
     relatives_dict = {}
+    citizens_id = []
     for citizen in input_json["citizens"]:
         relatives_dict[citizen["citizen_id"]] = citizen["relatives"]
+        datetime.strptime(citizen["birth_date"], '%d.%m.%Y')
+        citizens_id.append(citizen["citizen_id"])
+
+    if unique(citizens_id).size != len(citizens_id):
+        raise ValueError('Citizens ids are not unique')
+
     for citizen_id, relatives_ids in relatives_dict.items():
         for id_ in relatives_ids:
             if (citizen_id in relatives_dict[id_]) and (id_ in citizens_id):
                 continue
             else:
                 raise ValueError('Relatives array is not correct')
-
-
-def validate_date_and_citizens_id(input_json):
-    citizens_id = []
-    for citizen in input_json["citizens"]:
-        datetime.strptime(citizen["birth_date"], '%d.%m.%Y')
-        citizens_id.append(citizen["citizen_id"])
-    if unique(citizens_id).size != len(citizens_id):
-        raise ValueError('Citizens ids are not unique')
-    validate_relatives(input_json, citizens_id)
 
 
 
