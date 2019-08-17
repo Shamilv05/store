@@ -32,12 +32,15 @@ class Citizen(db.Model):
     birth_date = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     relatives = db.Column(MutableList.as_mutable(ARRAY(db.Integer)))
-    import_id = db.Column(db.String(100), nullable=False)
+    import_id = db.Column(db.Integer, nullable=False)
 
 
 class CitizenSchema(ma.ModelSchema):
     class Meta:
         model = Citizen
+        fields = ("citizen_id", "town", "street", "building", "apartment", "name", "birth_date",
+                  "gender", "relatives")
+
 
 
 
