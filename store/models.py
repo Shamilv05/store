@@ -1,4 +1,4 @@
-from app import db, ma
+from store.citizens.app import db, ma
 from sqlalchemy.ext.mutable import Mutable
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -24,13 +24,13 @@ class Citizen(db.Model):
     __tablename__ = "citizens"
     id = db.Column(db.Integer, primary_key=True)
     citizen_id = db.Column(db.Integer, nullable=False)
-    town = db.Column(db.String(100), nullable=False)
-    street = db.Column(db.String(100), nullable=False)
-    building = db.Column(db.String(100), nullable=False)
+    town = db.Column(db.String(256), nullable=False)
+    street = db.Column(db.String(256), nullable=False)
+    building = db.Column(db.String(256), nullable=False)
     apartment = db.Column(db.Integer, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    birth_date = db.Column(db.String(100), nullable=False)
-    gender = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(256), nullable=False)
+    birth_date = db.Column(db.String(10), nullable=False)
+    gender = db.Column(db.String(6), nullable=False)
     relatives = db.Column(MutableList.as_mutable(ARRAY(db.Integer)))
     import_id = db.Column(db.Integer, nullable=False)
 
