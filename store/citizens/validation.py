@@ -12,31 +12,38 @@ citizens_schema = {
                 'properties': {
                     'citizen_id': {
                         'type': 'integer',
-                        'minimum': 0
+                        'minimum': 0,
+                        'maximum': 2147483647
                     },
                     'town': {
                         'type': 'string',
                         'pattern': '^[^\s]+(\s+[^\s]+)*$',
+                        'maxLength': 256
                     },
                     'street': {
                         'type': 'string',
                         'pattern': '^[^\s]+(\s+[^\s]+)*$',
+                        'maxLength': 256
                     },
                     'building': {
                         'type': 'string',
                         'pattern': '^[^\s]+(\s+[^\s]+)*$',
+                        'maxLength': 256
                     },
                     'apartment': {
                         'type': 'integer',
-                        'minimum': 0
+                        'minimum': 0,
+                        'maximum': 2147483647
                     },
                     'name': {
                         'type': 'string',
                         'pattern': '^[^\s]+(\s+[^\s]+)*$',
+                        'maxLength': 256
                     },
                     'birth_date': {
                         'type': 'string',
-                        'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$'
+                        'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$',
+                        'maxLength': 10
                     },
                     'gender': {
                         'type': 'string',
@@ -45,7 +52,9 @@ citizens_schema = {
                     'relatives': {
                         'type': 'array',
                         'items': {
-                            'type': 'integer'
+                            'type': 'integer',
+                            'minimum': 0,
+                            'maximum': 2147483647
                         },
                         "uniqueItems": True
                     }
@@ -67,27 +76,33 @@ patch_req_schema = {
     'properties': {
         'town': {
             'type': 'string',
-            'pattern': '^[^\s]+(\s+[^\s]+)*$'
+            'pattern': '^[^\s]+(\s+[^\s]+)*$',
+            'maxLength': 256
         },
         'street': {
             'type': 'string',
-            'pattern': '^[^\s]+(\s+[^\s]+)*$'
+            'pattern': '^[^\s]+(\s+[^\s]+)*$',
+            'maxLength': 256
         },
         'building': {
             'type': 'string',
-            'pattern': '^[^\s]+(\s+[^\s]+)*$'
+            'pattern': '^[^\s]+(\s+[^\s]+)*$',
+            'maxLength': 256
         },
         'apartment': {
             'type': 'integer',
-            'minimum': 0
+            'minimum': 0,
+            'maximum': 2147483647
         },
         'name': {
             'type': 'string',
-            'pattern': '^[^\s]+(\s+[^\s]+)*$'
+            'pattern': '^[^\s]+(\s+[^\s]+)*$',
+            'maxLength': 256
         },
         'birth_date': {
             'type': 'string',
-            'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$'
+            'pattern': '^([0-2][0-9]|(3)[0-1])(.)(((0)[0-9])|((1)[0-2]))(.)\d{4}$',
+            'maxLength': 10
         },
         'gender': {
             'type': 'string',
@@ -96,7 +111,9 @@ patch_req_schema = {
         'relatives': {
             'type': 'array',
             'items': {
-                'type': 'integer'
+                'type': 'integer',
+                'minimum': 0,
+                'maximum': 2147483647
             },
             "uniqueItems": True
         },
@@ -111,7 +128,10 @@ def json_validation(input_json):
     citizens_id = []
     for citizen in input_json["citizens"]:
         relatives_dict[citizen["citizen_id"]] = citizen["relatives"]
-        datetime.strptime(citizen["birth_date"], '%d.%m.%Y')
+
+        if datetime.strptime(citizen["birth_date"], '%d.%m.%Y') > datetime.utcnow():
+            raise ValueError('Birth date is not correct')
+
         citizens_id.append(citizen["citizen_id"])
 
     if unique(citizens_id).size != len(citizens_id):

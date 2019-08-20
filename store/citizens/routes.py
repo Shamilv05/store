@@ -1,18 +1,20 @@
 import json
-from flask import request, jsonify
-from app import app, db
-from utils import json_response, JSON_MIME_TYPE, calculate_age_arr
-from validation import citizens_schema, patch_req_schema, json_validation
+from flask import request, jsonify, Blueprint
+from store.citizens.app import db
+from store.citizens.utils import json_response, JSON_MIME_TYPE, calculate_age_arr
+from store.citizens.validation import citizens_schema, patch_req_schema, json_validation
 from sqlalchemy.sql.expression import func
-from models import Citizen, CitizenSchema
-from numpy import zeros, percentile, unique
+from store.models import Citizen, CitizenSchema
+from numpy import zeros, percentile
 from datetime import datetime
-from sqlalchemy import exc, and_
+from sqlalchemy import exc
 from fastjsonschema import validate
 from fastjsonschema.exceptions import JsonSchemaException
 
+citizens = Blueprint('app', __name__)
 
-@app.route("/imports", methods=["POST"])
+
+@citizens.route("/imports", methods=["POST"])
 def imports():
     if request.content_type != JSON_MIME_TYPE:
         error = json.dumps({'error': 'Invalid Content Type'})
@@ -59,7 +61,7 @@ def imports():
     return json_response(json.dumps(import_id))
 
 
-@app.route("/imports/<string:import_id>/citizens/<int:citizen_id>", methods=["PATCH"])
+@citizens.route("/imports/<int:import_id>/citizens/<int:citizen_id>", methods=["PATCH"])
 def modify(import_id, citizen_id):
     if request.content_type != JSON_MIME_TYPE:
         error = json.dumps({'error': 'Invalid Content Type'})
@@ -74,6 +76,20 @@ def modify(import_id, citizen_id):
         return json_response(error, 400)
 
     citizen_to_update = Citizen.query.filter_by(import_id=import_id, citizen_id=citizen_id).first()
+
+    if not citizen_to_update:
+        error = json.dumps({'error': 'Incorrect import_id or citizen_id'})
+        return json_response(error, 400)
+
+    if 'birth_date' in data:
+        try:
+            if datetime.strptime(data["birth_date"], '%d.%m.%Y') > datetime.utcnow():
+                error = json.dumps({'error': 'Birth date is not correct'})
+                return json_response(error, 400)
+        except ValueError as e:
+            error = json.dumps({'error': f'{e}'})
+            return json_response(error, 400)
+
     if 'relatives' in data:
         for c_id in data['relatives']:
             exists = db.session.query(Citizen).filter_by(import_id=import_id, citizen_id=c_id).scalar() is not None
@@ -121,27 +137,37 @@ def modify(import_id, citizen_id):
 
 
 # why import_id string??discuss it
-@app.route("/imports/<string:import_id>/citizens", methods=["GET"])
+@citizens.route("/imports/<int:import_id>/citizens", methods=["GET"])
 def citizens_info(import_id):
     certain_citizens = Citizen.query.filter_by(import_id=import_id).all()
     db.session.close()
+
+    if not certain_citizens:
+        error = json.dumps({'error': 'This import_id does not exist yet'})
+        return json_response(error, 400)
+
     citizen_schema = CitizenSchema(many=True)
     output = citizen_schema.dump(certain_citizens).data
     return jsonify({'data': output})
 
 
-@app.route("/imports/<string:import_id>/citizens/birthdays", methods=["GET"])
+@citizens.route("/imports/<string:import_id>/citizens/birthdays", methods=["GET"])
 def birthdays(import_id):
-    citizens = Citizen.query.filter_by(import_id=import_id).all()
-    birthdays_dict = {}
-    db.session.close()
+    certain_citizens = Citizen.query.filter_by(import_id=import_id).all()
 
-    for citizen in citizens:
+    if not certain_citizens:
+        error = json.dumps({'error': 'This import_id does not exist yet'})
+        return json_response(error, 400)
+
+    db.session.close()
+    birthdays_dict = {}
+
+    for citizen in certain_citizens:
         citizen_id = citizen.citizen_id
         # amount of presents certain citizen should buy(index of array = num of month)
         birthdays_dict[citizen_id] = zeros(12)
         for relative_id in citizen.relatives:
-            relative_info = (list(filter(lambda person: person.citizen_id == relative_id, citizens)))[0]
+            relative_info = (list(filter(lambda person: person.citizen_id == relative_id, certain_citizens)))[0]
             relative_brthday = datetime.strptime(relative_info.birth_date, "%d.%m.%Y").month
             birthdays_dict[citizen_id][relative_brthday - 1] += 1
 
@@ -170,12 +196,17 @@ def birthdays(import_id):
     return json_response(json.dumps(response), 200)
 
 
-@app.route("/imports/<string:import_id>/towns/stat/percentile/age", methods=["GET"])
+@citizens.route("/imports/<string:import_id>/towns/stat/percentile/age", methods=["GET"])
 def count_percentile(import_id):
     birth_days_grouped_by_town = db.session.query(Citizen.town, func.array_agg(Citizen.birth_date))   \
              .filter_by(import_id=import_id)   \
              .group_by(Citizen.town).all()
     db.session.close()
+
+    if not birth_days_grouped_by_town:
+        error = json.dumps({'error': 'This import_id does not exist yet'})
+        return json_response(error, 400)
+
     test_dict = dict(birth_days_grouped_by_town)
     response = {
         'data': []
