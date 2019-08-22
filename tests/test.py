@@ -494,6 +494,281 @@ class TestUser(unittest.TestCase):
                                      content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
+    def test_get_citizens(self):
+        relatives = {
+            "citizens": [
+                {
+                    "citizen_id": 1,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Ross",
+                    "street": "Griffin",
+                    "birth_date": "23.07.2016",
+                    "gender": "male",
+                    "relatives": [2, 3]
+                },
+                {
+                    "citizen_id": 2,
+                    "apartment": 5,
+                    "building": "Milk",
+                    "name": "Сергей",
+                    "town": "Waters",
+                    "street": "Cox",
+                    "birth_date": "23.07.2016",
+                    "gender": "male",
+                    "relatives": [1]
+                },
+                {
+                    "citizen_id": 3,
+                    "apartment": 36,
+                    "building": "Milk",
+                    "name": "Анна",
+                    "town": "Burch",
+                    "street": "Hughes",
+                    "birth_date": "23.07.2016",
+                    "gender": "female",
+                    "relatives": [1]
+                }
+            ]
+        }
+
+        good_response = {
+            "data": [
+                {
+                    "citizen_id": 1,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Ross",
+                    "street": "Griffin",
+                    "birth_date": "23.07.2016",
+                    "gender": "male",
+                    "relatives": [2, 3]
+                },
+                {
+                    "citizen_id": 2,
+                    "apartment": 5,
+                    "building": "Milk",
+                    "name": "Сергей",
+                    "town": "Waters",
+                    "street": "Cox",
+                    "birth_date": "23.07.2016",
+                    "gender": "male",
+                    "relatives": [1]
+                },
+                {
+                    "citizen_id": 3,
+                    "apartment": 36,
+                    "building": "Milk",
+                    "name": "Анна",
+                    "town": "Burch",
+                    "street": "Hughes",
+                    "birth_date": "23.07.2016",
+                    "gender": "female",
+                    "relatives": [1]
+                }
+            ]
+        }
+
+        response = self.client.post('/imports', data=json.dumps(relatives),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        json_response = json.loads(response.get_data(as_text=True))
+        import_id_ = json_response['data']['import_id']
+
+        response = self.client.get(f'/imports/{import_id_}/citizens')
+        self.assertEqual(json.loads(response.get_data(as_text=True)), good_response)
+        self.assertEqual(response.status_code, 200)
+
+    def test_good_birthdays(self):
+        relatives = {
+            "citizens": [
+                {
+                    "citizen_id": 1,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Ross",
+                    "street": "Griffin",
+                    "birth_date": "30.12.2001",
+                    "gender": "male",
+                    "relatives": [2, 3]
+                },
+                {
+                    "citizen_id": 2,
+                    "apartment": 5,
+                    "building": "Milk",
+                    "name": "Сергей",
+                    "town": "Waters",
+                    "street": "Cox",
+                    "birth_date": "17.09.2008",
+                    "gender": "male",
+                    "relatives": [1]
+                },
+                {
+                    "citizen_id": 3,
+                    "apartment": 36,
+                    "building": "Milk",
+                    "name": "Анна",
+                    "town": "Burch",
+                    "street": "Hughes",
+                    "birth_date": "07.02.2013",
+                    "gender": "female",
+                    "relatives": [1]
+                }
+            ]
+        }
+
+        response = self.client.post('/imports', data=json.dumps(relatives),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        json_response = json.loads(response.get_data(as_text=True))
+        import_id_ = json_response['data']['import_id']
+
+        good_response = {
+            "data": {
+                "1": [],
+                "2": [
+                    {
+                        "citizen_id": 1,
+                        "presents": 1
+                    }
+                ],
+                "3": [],
+                "4": [],
+                "5": [],
+                "6": [],
+                "7": [],
+                "8": [],
+                "9": [
+                    {
+                        "citizen_id": 1,
+                        "presents": 1
+                    }
+                ],
+                "10": [],
+                "11": [],
+                "12": [
+                    {
+                        "citizen_id": 2,
+                        "presents": 1
+                    },
+                    {
+                        "citizen_id": 3,
+                        "presents": 1
+                    }
+                ]
+            }
+        }
+
+        response = self.client.get(f'/imports/{import_id_}/citizens/birthdays')
+        self.assertEqual(json.loads(response.get_data(as_text=True)), good_response)
+        self.assertEqual(response.status_code, 200)
+
+    def test_good_percentile(self):
+        relatives = {
+            "citizens": [
+                {
+                    "citizen_id": 1,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Ross",
+                    "street": "Griffin",
+                    "birth_date": "01.02.1997",
+                    "gender": "male",
+                    "relatives": [2, 3]
+                },
+                {
+                    "citizen_id": 2,
+                    "apartment": 5,
+                    "building": "Milk",
+                    "name": "Сергей",
+                    "town": "Waters",
+                    "street": "Cox",
+                    "birth_date": "18.04.2001",
+                    "gender": "male",
+                    "relatives": [1]
+                },
+                {
+                    "citizen_id": 3,
+                    "apartment": 36,
+                    "building": "Milk",
+                    "name": "Анна",
+                    "town": "Burch",
+                    "street": "Hughes",
+                    "birth_date": "13.09.2001",
+                    "gender": "female",
+                    "relatives": [1]
+                },
+                {
+                    "citizen_id": 4,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Ross",
+                    "street": "Griffin",
+                    "birth_date": "08.07.1956",
+                    "gender": "male",
+                    "relatives": []
+                },
+                {
+                    "citizen_id": 5,
+                    "apartment": 37,
+                    "building": "Milk",
+                    "name": "Иван",
+                    "town": "Cox",
+                    "street": "Griffin",
+                    "birth_date": "06.06.2006",
+                    "gender": "male",
+                    "relatives": []
+                }
+            ]
+        }
+
+        response = self.client.post('/imports', data=json.dumps(relatives),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        json_response = json.loads(response.get_data(as_text=True))
+        import_id_ = json_response['data']['import_id']
+
+        good_response = {
+            "data": [
+                {
+                    "town": "Burch",
+                    "p50": 17,
+                    "p75": 17,
+                    "p99": 17
+                },
+                {
+                    "town": "Cox",
+                    "p50": 13,
+                    "p75": 13,
+                    "p99": 13
+                },
+                {
+                    "town": "Ross",
+                    "p50": 42.5,
+                    "p75": 52.75,
+                    "p99": 62.59
+                },
+                {
+                    "town": "Waters",
+                    "p50": 18,
+                    "p75": 18,
+                    "p99": 18
+                }
+            ]
+        }
+
+        response = self.client.get(f'/imports/{import_id_}/towns/stat/percentile/age')
+        self.assertEqual(json.loads(response.get_data(as_text=True)), good_response)
+        self.assertEqual(response.status_code, 200)
+
+
+
+
 
 
 
