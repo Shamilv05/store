@@ -192,7 +192,7 @@ def birthdays(import_id):
     for cit_id, presents_arr in birthdays_dict.items():
         for index, val in enumerate(presents_arr):
             if val != 0:
-                response['data'][str(index + 1)].append({'citizen_id': f'{cit_id}', 'presents': val})
+                response['data'][str(index + 1)].append({'citizen_id': cit_id, 'presents': val})
 
     return json_response(json.dumps(response), 200)
 
