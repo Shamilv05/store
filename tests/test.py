@@ -1,5 +1,3 @@
-# before running these tests, you should have created psql db, because setUp cycle was missed on purpose
-
 import unittest
 import json
 

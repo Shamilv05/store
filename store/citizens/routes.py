@@ -51,6 +51,8 @@ def imports():
         db.session.commit()
     except exc.SQLAlchemyError:
         db.session.rollback()
+        error = json.dumps({'error': 'Cannot insert citizens into db'})
+        return json_response(error, 400)
 
     import_id = {
         "data": {
@@ -79,7 +81,7 @@ def modify(import_id, citizen_id):
 
     if not citizen_to_update:
         error = json.dumps({'error': 'Incorrect import_id or citizen_id'})
-        return json_response(error, 400)
+        return json_response(error, 404)
 
     if 'birth_date' in data:
         try:
@@ -136,7 +138,6 @@ def modify(import_id, citizen_id):
     return json_response(jsonify({'data': output}), 200)
 
 
-# why import_id string??discuss it
 @citizens.route("/imports/<int:import_id>/citizens", methods=["GET"])
 def citizens_info(import_id):
     certain_citizens = Citizen.query.filter_by(import_id=import_id).all()
@@ -144,7 +145,7 @@ def citizens_info(import_id):
 
     if not certain_citizens:
         error = json.dumps({'error': 'This import_id does not exist yet'})
-        return json_response(error, 400)
+        return json_response(error, 404)
 
     citizen_schema = CitizenSchema(many=True)
     output = citizen_schema.dump(certain_citizens).data
@@ -157,7 +158,7 @@ def birthdays(import_id):
 
     if not certain_citizens:
         error = json.dumps({'error': 'This import_id does not exist yet'})
-        return json_response(error, 400)
+        return json_response(error, 404)
 
     db.session.close()
     birthdays_dict = {}
@@ -205,7 +206,7 @@ def count_percentile(import_id):
 
     if not birth_days_grouped_by_town:
         error = json.dumps({'error': 'This import_id does not exist yet'})
-        return json_response(error, 400)
+        return json_response(error, 404)
 
     test_dict = dict(birth_days_grouped_by_town)
     response = {
