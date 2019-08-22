@@ -1,7 +1,6 @@
 from datetime import datetime
 from numpy import unique
 
-# Schema for JSON, which we get in /imports API
 citizens_schema = {
     'type': 'object',
     'properties': {
