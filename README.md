@@ -170,12 +170,16 @@ sudo nano /etc/supervisor/conf.d/store.conf
 ``` 
 [program:store]
 directory=/home/<user>/store
-command=/home/<user>/store/venv/bin/gunicorn -w 3 run:app
+command=/home/<user>/store/venv/bin/gunicorn -w <num> run:app
 user=<user>
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
+```
+, где num = (2 x num_cores) + 1. Узнать num_cores можно с помощью команды
+```bash
+nproc --all
 ```
 
 Запускаем:
