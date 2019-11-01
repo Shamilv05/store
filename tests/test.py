@@ -765,13 +765,3 @@ class TestUser(unittest.TestCase):
         response = self.client.get(f'/imports/{import_id_}/towns/stat/percentile/age')
         self.assertEqual(json.loads(response.get_data(as_text=True)), good_response)
         self.assertEqual(response.status_code, 200)
-
-
-
-
-
-
-
-
-
-

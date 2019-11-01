@@ -221,35 +221,3 @@ def count_percentile(import_id):
         response['data'].append({'town': f'{key}', 'p50': p50, 'p75': p75, 'p99': p99})
 
     return json_response(json.dumps(response), 200)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

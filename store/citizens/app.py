@@ -15,8 +15,3 @@ def create_app():
     app.register_blueprint(citizens)
 
     return app
-
-
-
-
-

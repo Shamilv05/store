@@ -40,12 +40,3 @@ class CitizenSchema(ma.ModelSchema):
         model = Citizen
         fields = ("citizen_id", "town", "street", "building", "apartment", "name", "birth_date",
                   "gender", "relatives")
-
-
-
-
-
-
-
-
-

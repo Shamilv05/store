@@ -142,6 +142,3 @@ def json_validation(input_json):
                 continue
             else:
                 raise ValueError('Relatives array is not correct')
-
-
-

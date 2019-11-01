@@ -18,4 +18,3 @@ def calculate_age_arr(brth_days):
         datetime_format = datetime.strptime(value, '%d.%m.%Y')
         brth_days[index] = today.year - datetime_format.year - ((today.month, today.day) < (datetime_format.month, datetime_format.day))
     return brth_days
-
