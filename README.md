@@ -1,47 +1,46 @@
-# Store
+# Store(REST API)
 
-Вступительное задание для первой Школы Бэкенд Разработки от Яндекс
 ![alt text](https://i0.wp.com/blog.fossasia.org/wp-content/uploads/2017/10/Screenshot_2.png?fit=692%2C250&ssl=1)
 
-## Установка
+## Configuration
 
-Для начала необходимо установить [pip](https://pip.pypa.io/en/stable/)
+First you need to install [pip](https://pip.pypa.io/en/stable/)
 
-Если у вас macOs, тогда можно воспользоваться
+If you have macOS, then you can use
 ```bash
 sudo easy_install pip
 ```
 
-Если у вас Ubuntu, тогда необходимо использовать следующие команды
+If you have Ubuntu, then you need to use the following commands
 ```bash
 sudo apt-get update
 sudo apt-get -y install python3-pip
 ```
 
-Теперь можно перейти к установке необходимых библиотек для запуска нашего приложения
-Создаем папку с нашим проектом и папку venv внутри:
+Now you can proceed to install the necessary libraries to run our application
+Create a folder with our project and a venv folder inside:
 ```bash
 mkdir myproject
 cd myproject
 python3 -m venv venv
 ```
-Активируем виртуальное окружение
+Activate the virtual environment
 ```bash
 . venv/bin/activate
 ```
-Для установки библиотек необходимо использовать requirements.txt (виртуальное окружение должно быть активировано)
+To install the libraries, you have to use requirements.txt (the virtual environment must be activated)
 ```bash
 pip3 install -r requirements.txt
 ```
 
 ## Database Migration
-Перед использованием нашего приложения необходимо: установить Postgres и настроить environment переменные:
+Before running application, you have to configure Postgres and environment variables:
 ```bash
 export SECRET_KEY='your_secret_key'
 export DATABASE_URI='your db uri'
 ```
 
-,после этого 
+,the next step is
 ```bash
 python manage.py db init
 python manage.py db migrate
@@ -49,64 +48,64 @@ python manage.py db upgrade
 ```
 
 ## Usage
-Для запуска сервиса, используйте следующую команду:
+To start the service, use the following command:
 ```bash
 python3 run.py
 ```
 
-## Запуск Тестов
+## Running Tests
 ```bash
 python3 -m unittest tests/test.py
 ```
 
-# Использование библиотек
+# Libraries Usage
 #### Numpy
-Использовалась для подсчета percentile, заполнения массива нулями с помощью zeros.
+Used to calculate percentile, filling an array with zeros using numpy.zeros
 #### Flask
-Основа для написания данного API. 
+Framework for writing current API
 #### SQLAlchemy, Flask-SQLAlchemy
-Использовалась для взаимодействия с базой данных.
+Used to interact with the database
 #### MarshMallow, Flask-Marshmallow
-Использовалась для преобразования сложных типов данных в питоновские типы данных (в нашем приложении использовалась для преобразования данных из базы в вид, описанный в задании).
+Used to convert complex data types to Python data types
 #### fastjsonschema
-Использовалась для валидации входных данных. Также возможно использование обычной jsonschema, но тогда валидация будет медленнее.
+Used to validate input data. Using regular jsonschema is also possible, but then validation will be slower.
 #### datetime
-Использовалась для валидации дат, то есть формата ДД.ММ.ГГГГ, получения utcnow(), а также для недопустимости ввода дней рождения, дата которых больше текущей.
+It was used to validate dates, that is, the DD.MM.YYYY format, to obtain utcnow (), and also to inadmissibly enter birthdays whose date is greater than the current one.
 #### unittest
-Использовалась для написания тестов.
+Used for writting tests
 
-# Deploy (Nginx + gunicorn + supervisor)
+# Deploy (Nginx + gunicorn + Supervisor)
 ![alt text](https://miro.medium.com/proxy/1*nFxyDwJ2DEH1G5PMKPMj1g.png)
 
-Для деплоя приложения нам понадобится сервер
+To deploy the application we need a host
 ```bash
 ssh username@host
 ```
-Следующим шагом является установка Postgres и создание пользователя. Все необходимые шаги по установке Postgres на Ubuntu 18.04 описаны [здесь](https://linuxize.com/post/how-to-install-postgresql-on-ubuntu-18-04/)
+The next step is to install Postgres and create a user. All the necessary steps to install Postgres on Ubuntu 18.04 are described [here](https://linuxize.com/post/how-to-install-postgresql-on-ubuntu-18-04/)
 
-Теперь можно приступить к загрузке файлов, используя git clone
+Now you can start downloading files using git clone
 ```bash
 git clone "repo"
 ```
-После этого установить необходимые инструменты и библиотеки
+After that, install the necessary tools and libraries
 ```bash
 sudo apt install python3-pip
 sudo apt install python3-venv
 python3 -m venv store/venv
 ```
-Перейдем в папку с проектом
+Move to the project folder
 ```bash
 cd store
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-После этого необходимо немного изменить файл config.py, так как есть более удобный способ, чем использование env переменных
+After that, you need to slightly modify the config.py file, since there is a more convenient way than using env variables
 ```bash
 sudo touch /etc/config.json
 sudo nano /etc/config.json
 ```
-Внутрь добавляем:
+Inside we add:
 ``` 
 {
     "SECRET_KEY": "your_secret_key",
@@ -117,7 +116,7 @@ sudo nano /etc/config.json
 ```bash
 sudo nano config.py
 ```
-Проделываем следующие изменения в config.py
+Make the following changes to config.py
 ```python
 import json
 
@@ -130,19 +129,19 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 ```
 
-Проделываем шаги по migration, описанные выше
-Установим nginx & gunicorn
+Follow the migration steps described above
+Install nginx & gunicorn
 ```bash
 cd
 sudo apt install nginx
 pip install gunicorn
 ```
-Займемся конфигурацией nginx & gunicorn
+Let's dive into nginx & gunicorn configuration
 ```bash
 sudo rm /etc/nginx/sites-enabled/default
 sudo nano /etc/nginx/sites-enabled/store
 ```
-И добавляем в этот файл следующее:
+And add the following to this file:
 ``` 
 server {
     listen 8080;
@@ -161,12 +160,12 @@ server {
 sudo systemctl restart nginx
 ```
 
-Теперь необходимо заняться supervisor:
+Now you need to configure supervisor:
 ```bash
 sudo apt install supervisor
 sudo nano /etc/supervisor/conf.d/store.conf
 ```
-Также необходимо добавить следующее внутрь:
+It is also necessary to add the following inside:
 ``` 
 [program:store]
 directory=/home/<user>/store
@@ -177,18 +176,18 @@ autorestart=true
 stopasgroup=true
 killasgroup=true
 ```
-, где num = (2 x num_cores) + 1. Узнать num_cores можно с помощью команды
+, where num = (2 x num_cores) + 1. You can get num_cores using the command
 ```bash
 nproc --all
 ```
 
-Запускаем:
+Launch:
 ```bash
 sudo supervisorctl reload
 ```
 # Extra
 ### Postman
-Использовался для выполнения запросов к API и проверки корректности.
+Used to make API requests and validation.
 
 
 
